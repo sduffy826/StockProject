@@ -20,11 +20,11 @@ public class StockSymbolFactory {
       if (stockSymbolNameList.containsKey(symbol))
         stockName = stockSymbolNameList.get(symbol);
       else {
-    	// Not found call refresh list and search again
-    	this.refreshList(symbol);
-    	if (stockSymbolNameList.containsKey(symbol))
-    	  stockName = stockSymbolNameList.get(symbol);
-    	else
+    	  // Not found call refresh list and search again
+    	  this.refreshList(symbol);
+    	  if (stockSymbolNameList.containsKey(symbol))
+    	    stockName = stockSymbolNameList.get(symbol);
+    	  else
           stockName = new StockName(symbol,"** NOT FOUND **");
       }       
       return stockName.getName();
@@ -41,7 +41,7 @@ public class StockSymbolFactory {
     public void processSymbols(List<String> aList) {
       String allOfEm = "";
       for (int i = 0; i < aList.size(); i++) {
-    	allOfEm += "+" + aList.get(i);
+    	  allOfEm += "+" + aList.get(i);
       }
       this.refreshList(allOfEm.substring(1));
     }
@@ -50,26 +50,25 @@ public class StockSymbolFactory {
       try {    	  
          // See http://www.gummy-stuff.org/Yahoo-data.htm
          // for the tags to get elements out of yahoo finance
-    	 StockName stockName;
+    	   StockName stockName;
          String urlStr = new String("http://finance.yahoo.com/d/quotes.csv?s=");
-         urlStr = urlStr + _symList +
-                           "&f=sn"; // s is symbol, n is to get name
+         urlStr = urlStr + _symList + "&f=sn"; // s is symbol, n is to get name
          if (DEBUGIT) System.out.println("Sending: " + urlStr);
-         URL yahooFin = new URL(urlStr);
-         URLConnection yc = yahooFin.openConnection();
+         URL yahooFin      = new URL(urlStr);
+         URLConnection yc  = yahooFin.openConnection();
          BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
          String inputLine;
          if (DEBUGIT) System.out.println("Reading response");
          while ((inputLine = in.readLine()) != null) {
            String[] yahooStockInfo = inputLine.split(",");
-            if (yahooStockInfo.length > 1) {
-              yahooStockInfo[0] = yahooStockInfo[0].replaceAll("[\"]","");
-              yahooStockInfo[1] = yahooStockInfo[1].replaceAll("[\"]","");
-              if (stockSymbolNameList.containsKey(yahooStockInfo[0]) == false) {
+           if (yahooStockInfo.length > 1) {
+             yahooStockInfo[0] = yahooStockInfo[0].replaceAll("[\"]","");
+             yahooStockInfo[1] = yahooStockInfo[1].replaceAll("[\"]","");
+             if (stockSymbolNameList.containsKey(yahooStockInfo[0]) == false) {
              	 stockName = new StockName(yahooStockInfo[0], yahooStockInfo[1]);
-                 stockSymbolNameList.put(yahooStockInfo[0], stockName);
-              }
-            } // of of if on checking elements read
+               stockSymbolNameList.put(yahooStockInfo[0], stockName);
+             }
+           } // of of if on checking elements read
          } // End of while
       }  	
       catch (Exception e) {
@@ -84,7 +83,7 @@ public class StockSymbolFactory {
       String allData = "";
       for (Map.Entry<String, StockName> item : stockSymbolNameList.entrySet()) {
         stockName = item.getValue(); 
-    	allData = allData + "Symbol: " + stockName.toString() + '\n';        
+    	  allData = allData + "Symbol: " + stockName.toString() + '\n';        
       }      
       return allData;
     }    

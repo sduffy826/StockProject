@@ -1,17 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-// import com.spd.stock.*;
-
-// This program creates csv files with the historical prices for 
-// given stocks (includes dividends).  The arguments are:
-//    String filename - represents name of the file containing the stocks
-//                      you want to pull, each line in the file should
-//                      contain the stock symbol, and the number of
-//                      shares you have.
-//
-// 
-public class YahooStockPull {
+public class YahooStockCalcCurrentValue {
   public static void main(String[] args) throws Exception {
     Calendar defaultStartCal = CalendarHelper.getCal(1990,05,14);
     Calendar defaultEndCal   = new GregorianCalendar();
@@ -20,6 +10,7 @@ public class YahooStockPull {
     StockSymbolFactory stockSymbolFactory = StockSymbolFactory.getInstance();
     
     Map<String, Stock> stockList = new HashMap<String, Stock>(20);
+    List<Stock> stockArrayList = new ArrayList<Stock>(20);
     List<String> symbolList = new ArrayList<String>(20);
     String subDir = "";
     if (args.length == 0) {
@@ -31,34 +22,36 @@ public class YahooStockPull {
       if (args.length > 1) defaultStartCal = CalendarHelper.getCal(args[1]);
       if (args.length > 2) defaultEndCal = CalendarHelper.getCal(args[2]);    	    	
       
-      processFile(args[0], defaultStartCal, defaultEndCal, symbolList, stockList);
+      procFile(args[0], defaultStartCal, defaultEndCal, symbolList, stockList, stockArrayList);
       if ((args[0].substring(0,3).compareToIgnoreCase("mom") == 0) ||
           (args[0].substring(0,3).compareToIgnoreCase("dad") == 0)) {
         subDir = args[0].substring(0,3).toLowerCase();
       }
-      else
-        if ((args[0].substring(0,4).compareToIgnoreCase("sean") == 0) ||
-            (args[0].substring(0,4).compareToIgnoreCase("kids") == 0)) {
-          subDir = args[0].substring(0,4).toLowerCase();
-        }
     }
     // Call method that will populate the list of names
     stockSymbolFactory.processSymbols(symbolList);
     System.out.println(stockSymbolFactory.toString());
     dumpSymList(symbolList);
+    
+    processList(stockArrayList, stockSymbolFactory, pullStockInfoFromYahoo);
+    dumpStockArrayList(stockArrayList);
+    
+    /*
     buildListOfNames(stockList, stockSymbolFactory, pullStockInfoFromYahoo);
     dumpStocks2File(symbolList, stockList,subDir);
     
     dumpStocks2OneFile(symbolList, stockList, defaultStartCal, defaultEndCal, false, true);
+    */
     //dumpStocks2Console(stockList);
     System.out.println("All Done");
   }
   
-  private static void processFile(String _fileIn,
-		                              Calendar _startDate,
-		                              Calendar _endDate,
-		                              List<String> _symbolList,
-		                              Map<String, Stock> _stockList) {
+  private static void procFile(String _fileIn,
+		                           Calendar _startDate,
+		                           Calendar _endDate,
+		                           List<String> _symbolList,
+		                           Map<String, Stock> _stockMap,
+		                           List<Stock> _stockArrayList) {
     String inLine;
 	  float numShares;
 	  Stock aStock;
@@ -89,10 +82,12 @@ public class YahooStockPull {
 		        date2End = CalendarHelper.getCal(_endDate);
 	      
 	        aStock = new Stock(theArray[0].toUpperCase(),numShares, date2Start, date2End);
-	        _stockList.put(theArray[0].toUpperCase(),aStock);
+	        _stockMap.put(theArray[0].toUpperCase(),aStock);
+	        
+	        _stockArrayList.add(aStock);
 	      }  // end of the else
 	    }  // end of while
-	 }  // end of try block
+	  }  // end of try block
 	  catch (FileNotFoundException e) {
 	    System.out.println("File not found " + e);	
   	}
@@ -108,26 +103,27 @@ public class YahooStockPull {
 	  }
   }
   
-  private static void buildListOfNames(Map<String, Stock> _stockList,
-		                               StockSymbolFactory _stsn,
-		                               PullStockInfoFromYahoo _stdr) { 
-    // This method loops thru the stockList, it puts the name in for 
-    // each symbol, then calls the refreshStock method on it, that one
-    // will get the stock date/price and the date/dividend values.
-	  
+  private static void dumpStockArrayList(List<Stock> _stockArrayList) {    
     String theName;
-    System.out.println("--------------------------------------");	  
-	  
+    System.out.println("--------------------------------------");   
+    
+    for (int i = 0; i < _stockArrayList.size(); i++) {
+      _stockArrayList.get(i).calcValue();
+    }          
+    return;
+  }  
+  
+  private static void processList(List<Stock> _stockArrayList,
+                                  StockSymbolFactory _stsn,
+                                  PullStockInfoFromYahoo _stdr) {
     Stock aStock;
-    for (Map.Entry<String, Stock> item : _stockList.entrySet()) {
-      String symbol = item.getKey();
-      aStock = item.getValue();	 
-      theName = _stsn.getStockName4Ticker(symbol);
-      System.out.println("Symbol: " + symbol + " name: " + theName);
-      aStock.getStockAttributes().setName(_stsn.getStockName4Ticker(symbol));
+    String theName;
+    for (int i = 0; i < _stockArrayList.size(); i++) {
+      aStock  = _stockArrayList.get(i);
+      theName = _stsn.getStockName4Ticker(aStock.getTicker());
+      aStock.getStockAttributes().setName(theName);
       _stdr.refreshStock(aStock);
-	  }      
-	  return;
+    }
   }
   
   private static void dumpStocks2File(List<String> theList,
@@ -147,8 +143,8 @@ public class YahooStockPull {
                                          Calendar startCal, Calendar endCal, boolean incWeekends, boolean monthReport) {
     // We use theList to determine the order we want to output too, it contains the order
     // of the data in the file passed in.
-    String fileName = "/home/sduffy/stocks/allOfEm.csv";
-    fileName = fileName.replace('/',File.separatorChar);
+    String fileName  = "/home/sduffy/stocks/allOfEm.csv";
+    fileName         = fileName.replace('/',File.separatorChar);
     boolean writeHdr = true;
     
     try {

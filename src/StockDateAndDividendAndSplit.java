@@ -55,6 +55,19 @@ public class StockDateAndDividendAndSplit {
   public String getSplitValue() {
 	  return splitValue;
   }
+  public float getSplitFactor() {
+    float factor = (float)1.0;
+    if (splitValue.isEmpty() == false) {
+      String[] dummy = splitValue.split(":");
+      if (dummy.length > 1) {
+        float num = Float.parseFloat(dummy[0]);
+        float den = Float.parseFloat(dummy[1]);
+        factor = num/den;
+      }
+    }
+    return factor;
+  }
+  
   public char getRecordType() {
 	  return recordType;	  
   }

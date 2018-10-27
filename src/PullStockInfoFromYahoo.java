@@ -22,7 +22,7 @@ public class PullStockInfoFromYahoo {
     	this.refreshDividendInfo(_aStock.getTicker(),
     			                 _aStock.getStockDividendInfo(),
     			                 _aStock.getStockAttributes().getStartDate(),
-       			                 _aStock.getStockAttributes().getEndDate());
+       			               _aStock.getStockAttributes().getEndDate());
     }
     
     private synchronized void refreshStockValues(String _symbol,
@@ -53,7 +53,7 @@ public class PullStockInfoFromYahoo {
           try {
           	float dummy = Float.parseFloat(yahooStockInfo[1]);
             _list.add(new StockDateAndPrice(yahooStockInfo[0],   // Date
-        	                                yahooStockInfo[1],   // Open
+        	                                  yahooStockInfo[1],   // Open
                                             yahooStockInfo[2],   // High
                                             yahooStockInfo[3],   // Low
                                             yahooStockInfo[4],   // Close

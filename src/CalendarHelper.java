@@ -55,6 +55,13 @@ public class CalendarHelper {
   public static int getDay(Calendar theCal) {
     return theCal.get(Calendar.DAY_OF_MONTH);
   }
+  public static String getDayOfWeek(Calendar theCal) {
+    //create an array of days
+    String[] strDays = new String[]{"Sunday","Monday","Tuesday","Wednesday","Thusday","Friday","Saturday"};
+   
+    return strDays[theCal.get(Calendar.DAY_OF_WEEK) - 1];
+  }
+  
   public static String getIsoDate(Calendar theCal) {
     if ( theCal != null ) {
       return (new java.text.SimpleDateFormat("yyyy-MM-dd")).format(theCal.getTime());    
@@ -73,6 +80,12 @@ public class CalendarHelper {
 	  calObj.set(Calendar.DAY_OF_MONTH, calObj.getActualMaximum(Calendar.DAY_OF_MONTH));
 	  return calObj;
   }  
+  public static Calendar getNextDay(Calendar theCal) {
+    GregorianCalendar calObj = new GregorianCalendar(theCal.get(Calendar.YEAR), theCal.get(Calendar.MONTH), 
+                                                     theCal.get(Calendar.DAY_OF_MONTH));
+    calObj.add(Calendar.DAY_OF_MONTH,1);    
+    return calObj;
+  }  
       
   public static Calendar getNextEnd(Calendar theCal) {
 	  Calendar newCal = CalendarHelper.getLastDayOfMonth(theCal);
@@ -87,4 +100,15 @@ public class CalendarHelper {
            obj1.get(Calendar.MONTH)== obj2.get(Calendar.MONTH)&&
            obj1.get(Calendar.DAY_OF_MONTH)== obj2.get(Calendar.DAY_OF_MONTH); 
   }
+  public static int getDaysDifference(Calendar obj1, Calendar obj2) {
+    // Returns the number of days between two calendar objects, we calc difference in milliseconds and
+    // then divide by milliseconds in a day
+    long ms1 = obj1.getTime().getTime(); 
+    long ms2 = obj2.getTime().getTime();
+    return (int) ((ms1-ms2)/(1000*60*60*24));
+  }
+  
+  
+  
+  
 }
